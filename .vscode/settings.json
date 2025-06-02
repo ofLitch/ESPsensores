@@ -20,6 +20,7 @@
         "string_view": "cpp",
         "initializer_list": "cpp",
         "new": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "cmath": "cpp"
     }
 }

@@ -15,31 +15,19 @@ void taskTemperature(void *pvParameters) {
     // Desempaquetar los parámetros
     void **params = (void **)pvParameters;
     SemaphoreHandle_t mutex = (SemaphoreHandle_t)params[0];
-    unsigned short int dhtPin = *((unsigned short int*)params[1]);
-    unsigned short int dhtType = *((unsigned short int*)params[2]);
-
-    // Inicializar el sensor DHT - ¡Cada tarea necesita su propia instancia!
-    DHT dht(dhtPin, dhtType);
-    dht.begin();
-
-    // Comprobar que todos los parámetros sean válidos
-    if (mutex == NULL) {
-        Serial.println("Error: Parámetros inválidos en la tarea de temperatura.");
-        vTaskDelete(NULL);
-        return;
-    }
+    DHT *dht = (DHT *)params[1];
 
     while (true) {
-        float temperature = dht.readTemperature();
+        float temperature = dht->readTemperature();
+        Serial.print("Temperatura: ");
+        Serial.println(temperature);
         if (!isnan(temperature)) {
             if (xSemaphoreTake(mutex, portMAX_DELAY)) {
                 data.temperature = temperature;
                 xSemaphoreGive(mutex);
             }
-        } else {
-            Serial.println("Error leyendo temperatura. Usando valor anterior.");
-        }
-
+        } else Serial.println("Error leyendo temperatura. Usando valor anterior.");
+        
         vTaskDelay(pdMS_TO_TICKS(DHT_READ_INTERVAL_MS));
     }
 }
@@ -53,32 +41,20 @@ void taskHumidity(void *pvParameters) {
     // Desempaquetar los parámetros
     void **params = (void **)pvParameters;
     SemaphoreHandle_t mutex = (SemaphoreHandle_t)params[0];
-    unsigned short int dhtPin = *((unsigned short int*)params[1]);
-    unsigned short int dhtType = *((unsigned short int*)params[2]);
-
-    // Inicializar el sensor DHT - ¡Cada tarea necesita su propia instancia!
-    DHT dht(dhtPin, dhtType);
-    dht.begin();
-
-    // Comprobar que todos los parámetros sean válidos
-    if (mutex == NULL) {
-        Serial.println("Error: Parámetros inválidos en la tarea de humedad.");
-        vTaskDelete(NULL);
-        return;
-    }
+    DHT *dht = (DHT *)params[1];
 
     while (true) {
-        float humidity = dht.readHumidity();
+        float humidity = dht->readHumidity();
+        Serial.print("Humedad: ");
+        Serial.println(humidity);
         if (!isnan(humidity)) {
             if (xSemaphoreTake(mutex, portMAX_DELAY)) {
                 data.humidity = humidity;
                 xSemaphoreGive(mutex);
             }
-        } else {
-            Serial.println("Error leyendo humedad. Usando valor anterior.");
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(DHT_READ_INTERVAL_MS));
+        } else Serial.println("Error leyendo humedad. Usando valor anterior");
+        
+        vTaskDelay(pdMS_TO_TICKS(DHT_READ_INTERVAL_MS+205));
     }
 }
 
