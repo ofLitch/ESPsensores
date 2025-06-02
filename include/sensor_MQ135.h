@@ -5,7 +5,7 @@
 #include "MQUnifiedsensor.h"
 #include "sensorData.h"
 
-#define MQ135_READ_INTERVAL_MS 1000         |     ///< Intervalo de muestreo en milisegundos      
+#define MQ135_READ_INTERVAL_MS 1000               ///< Intervalo de muestreo en milisegundos      
 #define MQ135_VOLTAGE 4.0f                        ///< Voltaje en el que se alimenta el sensor MQ135 
 #define MQ135_ADC_RESOLUTION 12                   ///< Resolución del ADC (12 bits para ESP32)
 #define MQ135_RL 10.0f                            ///< Resistencia de carga (RL) en kiloohmios
