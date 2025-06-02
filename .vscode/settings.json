@@ -1,0 +1,25 @@
+{
+    "cSpell.words": [
+        "Unifiedsensor"
+    ],
+    "files.associations": {
+        "*.dbclient-js": "javascript",
+        "*.embeddedhtml": "html",
+        "*.php": "php",
+        "*.js": "javascript",
+        "*.html": "html",
+        "*.scss": "scss",
+        "*.py": "python",
+        "*.arff": "csv",
+        "array": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "initializer_list": "cpp",
+        "new": "cpp",
+        "random": "cpp"
+    }
+}
