@@ -4,8 +4,9 @@
 #include <RtcDS1302.h>
 
 /**
- * @brief Estructura para almacenar datos de los sensores ambientales.
- *
+ * @file sensorData.h
+ * @brief Definición de la estructura SensorData para almacenar datos de sensores ambientales.
+ * 
  * Contiene los valores medidos de temperatura, humedad, luz, humedad del suelo, concentración de gases y la fecha/hora actual.
  */
 struct SensorData {

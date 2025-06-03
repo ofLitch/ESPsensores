@@ -10,7 +10,8 @@
 #define LDR_READ_INTERVAL_MS 1000               ///< Intervalo de muestreo en milisegundos
 
 /**
- * @brief Lee el nivel de luz desde el sensor LDR y actualiza los datos compartidos.
+ * @file sensor_LDR.h
+ * @brief Definición de la tarea para leer datos del sensor LDR y actualizar los datos compartidos.
  *
  * @param pvParameters Puntero a los parámetros que incluye el mutex y el pin del sensor LDR.
  */

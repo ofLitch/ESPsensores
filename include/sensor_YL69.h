@@ -10,7 +10,8 @@
 #define YL_READ_INTERVAL_MS 3000               ///< Intervalo de muestreo en milisegundos
 
 /**
- * @brief Tarea encargada de leer el sensor YL69 de humedad del suelo y actualizar los datos compartidos.
+ * @file sensor_YL69.h
+  * @brief Definición de la tarea para leer datos del sensor YL69 y actualizar los datos compartidos.
  *
  * @param pvParameters Puntero a los parámetros que incluye el mutex y el pin del sensor YL69.
  */

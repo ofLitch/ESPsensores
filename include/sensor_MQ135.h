@@ -12,7 +12,8 @@
 #define MQ135_B -2.862                            ///< Valor B para configurar CO2
 
 /**
- * @brief Tarea encargada de leer el sensor MQ135 de gases y actualizar los datos compartidos.
+ * @file sensor_MQ135.h
+  * @brief Definición de la tarea para leer datos del sensor MQ135 y actualizar los datos compartidos.
  *
  * @param pvParameters Puntero a los parámetros que incluye el mutex y el sensor MQ135.
  */

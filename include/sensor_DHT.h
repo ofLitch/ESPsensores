@@ -7,7 +7,8 @@
 #define DHT_READ_INTERVAL_MS 2100  ///< Intervalo de muestreo en milisegundos
 
 /**
- * @brief Lee la temperatura desde el sensor DHT y actualiza los datos compartidos.
+ * @file sensor_DHT.h
+ * @brief Definición de las tareas para leer datos del sensor DHT y actualizar los datos compartidos.
  *
  * @param pvParameters Puntero a los parámetros que incluye el mutex y el sensor DHT.
  */
