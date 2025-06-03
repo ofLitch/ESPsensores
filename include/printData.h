@@ -6,6 +6,11 @@
 #include <Arduino.h>
 #include "sensorData.h"
 
+/**
+ * @brief Tarea encargada de imprimir los datos de los sensores en el puerto serial.
+ *
+ * @param pvParameters Puntero a los parámetros que incluye el mutex.
+ */
 void taskPrintData(void *pvParameters) { 
     void **params = (void **)pvParameters;
     SemaphoreHandle_t mutex = (SemaphoreHandle_t)params[0];   

@@ -11,8 +11,8 @@
 
 /**
  * @brief Lee el nivel de luz desde el sensor LDR y actualiza los datos compartidos.
- * 
- * @param pvParameters Puntero a los parámetros que incluye datos compartidos y mutex.
+ *
+ * @param pvParameters Puntero a los parámetros que incluye el mutex y el pin del sensor LDR.
  */
 void taskLDR(void *pvParameters) {    
     // Desempaquetar los parámetros
@@ -23,12 +23,12 @@ void taskLDR(void *pvParameters) {
     // Comprobar que el mutex y el pin LDR sean válidos
     if (mutex == NULL) {
         Serial.println("Error: Mutex no inicializado en la tarea LDR.");
-        vTaskDelete(NULL); // Terminar la tarea si el mutex es inválido
+        vTaskDelete(NULL);
         return;
     }
     if (ldrPin < 30 || ldrPin > 39) {
         Serial.println("Error: Pin LDR inválido.");
-        vTaskDelete(NULL); // Terminar la tarea si el pin es inválido
+        vTaskDelete(NULL);
         return;
     }
 

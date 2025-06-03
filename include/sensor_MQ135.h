@@ -12,12 +12,9 @@
 #define MQ135_B -2.862                            ///< Valor B para configurar CO2
 
 /**
- * @brief Tarea encargada de leer el sensor MQ135 de gases y mostrar valores procesados por consola.
- * 
- * Esta tarea ejecuta lecturas periódicas del sensor, calcula la resistencia, R0 y PPM
- * tanto corregido como sin corregir, usando temperatura y humedad estimadas.
- * 
- * @param pvParameters Puntero a parámetros si se usan datos compartidos o mutex.
+ * @brief Tarea encargada de leer el sensor MQ135 de gases y actualizar los datos compartidos.
+ *
+ * @param pvParameters Puntero a los parámetros que incluye el mutex y el sensor MQ135.
  */
 void taskMQ135(void *pvParameters) {    
     // Desempaquetar los parámetros

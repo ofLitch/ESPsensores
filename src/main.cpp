@@ -1,3 +1,6 @@
+// TODO: Hace falta
+// Manejo de errores, manejo de excepciones
+
 // Librerías
 #include <ThreeWire.h> 
 #include <RtcDS1302.h>

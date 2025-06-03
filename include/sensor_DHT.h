@@ -9,7 +9,7 @@
 /**
  * @brief Lee la temperatura desde el sensor DHT y actualiza los datos compartidos.
  *
- * @param pvParameters Puntero a los parámetros que incluye datos compartidos, sensor y mutex.
+ * @param pvParameters Puntero a los parámetros que incluye el mutex y el sensor DHT.
  */
 void taskTemperature(void *pvParameters) {
     // Desempaquetar los parámetros
@@ -17,10 +17,19 @@ void taskTemperature(void *pvParameters) {
     SemaphoreHandle_t mutex = (SemaphoreHandle_t)params[0];
     DHT *dht = (DHT *)params[1];
 
+    // Comprobar que el mutex y el sensor DHT sean válidos
+    if (mutex == NULL || dht == NULL) {
+        Serial.println("Error: Mutex o sensor DHT no inicializados.");
+        vTaskDelete(NULL);
+        return;
+    }
+
+    // Configurar el sensor DHT y comenzar la lectura
+    float temperature = 0.0f;
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
     while (true) {
-        float temperature = dht->readTemperature();
-        Serial.print("Temperatura: ");
-        Serial.println(temperature);
+        temperature = dht->readTemperature();
         if (!isnan(temperature)) {
             if (xSemaphoreTake(mutex, portMAX_DELAY)) {
                 data.temperature = temperature;
@@ -35,7 +44,7 @@ void taskTemperature(void *pvParameters) {
 /**
  * @brief Lee la humedad desde el sensor DHT y actualiza los datos compartidos.
  *
- * @param pvParameters Puntero a los parámetros que incluye datos compartidos, sensor y mutex.
+ * @param pvParameters Puntero a los parámetros que incluye el mutex y el sensor DHT.
  */
 void taskHumidity(void *pvParameters) {
     // Desempaquetar los parámetros
@@ -51,7 +60,6 @@ void taskHumidity(void *pvParameters) {
     }
 
     // Configurar el sensor DHT y comenzar la lectura
-    dht->begin();
     float humidity = 0.0f;
     vTaskDelay(pdMS_TO_TICKS(1000));
     

@@ -11,7 +11,7 @@
 
 /**
  * @brief Tarea encargada de leer el sensor YL69 de humedad del suelo y actualizar los datos compartidos.
- * 
+ *
  * @param pvParameters Puntero a los parámetros que incluye el mutex y el pin del sensor YL69.
  */
 void taskYL69(void *pvParameters) {
