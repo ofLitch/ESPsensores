@@ -26,6 +26,7 @@
 #include "sensor_LDR.h"
 #include "sensor_YL69.h"
 #include "printData.h"
+#include "esp_sensores_now.h"
 
 /* =========== Definiciones ============ */
 // Sensores
@@ -36,6 +37,8 @@
 #define MQ135_AO_PIN          35                    ///< Pin analógico para MQ135
 #define MQ135_VOLTAGE         4.0f                  ///< Voltaje en el que se alimenta el sensor MQ135
 #define MQ135_ADC_RESOLUTION  12                    ///< Resolución del ADC (12 bits para ESP32)
+// ESP-NOW
+//#define BROADCAST_ADDRESS     {0xF4, 0x65, 0x0B, 0xE5, 0x49, 0x88} ///< Dirección MAC de broadcast para ESP-NOW F4:65:0B:E5:49:88
 
 /* =========== Configuración FreeRTOS ============== */
 #if CONFIG_FREERTOS_UNICORE
@@ -81,13 +84,14 @@ void setup() {
   void *paramsYL69[2] = {mutex, (void *)(uintptr_t)ylPin};
 
   // Tasks Sensores
+  xTaskCreate(taskEspNow, "ESP-NOW Task", 8196, paramData, 2, NULL);
   xTaskCreate(taskTemperature, "DHT11: Read Temperature Function", 4096, paramsDHT, 2, NULL);
   xTaskCreate(taskHumidity, "DHT11: Read Humidity Function", 4096, paramsDHT, 2, NULL);
   xTaskCreate(taskMQ135, "MQ135: Read Gas Concentration", 2048, paramsMQ135, 2, NULL);
   xTaskCreate(taskYL69, "YL69: Read Soil Moisture", 2048, paramData, 2, NULL);
   xTaskCreate(taskLDR, "LDR: Read Light Level", 2048, paramsLDR, 2, NULL);
   // Tarea para imprimir datos
-  xTaskCreate(taskPrintData, "Print Sensor Data", 2048, paramData, 2, NULL);
+  //xTaskCreate(taskPrintData, "Print Sensor Data", 2048, paramData, 2, NULL);
 }
 
 void loop() {}
