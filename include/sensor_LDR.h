@@ -15,18 +15,36 @@
  * @param pvParameters Puntero a los parámetros que incluye datos compartidos y mutex.
  */
 void taskLDR(void *pvParameters) {    
+    // Desempaquetar los parámetros
     void **params = (void **)pvParameters;
     SemaphoreHandle_t mutex = (SemaphoreHandle_t)params[0];
     int ldrPin = (int)(uintptr_t)params[1];
-    pinMode(ldrPin, INPUT); // Configurar el pin LDR como entrada
 
+    // Comprobar que el mutex y el pin LDR sean válidos
+    if (mutex == NULL) {
+        Serial.println("Error: Mutex no inicializado en la tarea LDR.");
+        vTaskDelete(NULL); // Terminar la tarea si el mutex es inválido
+        return;
+    }
+    if (ldrPin < 30 || ldrPin > 39) {
+        Serial.println("Error: Pin LDR inválido.");
+        vTaskDelete(NULL); // Terminar la tarea si el pin es inválido
+        return;
+    }
+
+    // Configuración del LDR
+    pinMode(ldrPin, INPUT);
+    unsigned short int light = 0;
+    vTaskDelay(pdMS_TO_TICKS(1000));
+
+    // Comenzar la lectura del LDR
     while (true) {
-        data.light = analogRead(ldrPin);
-        Serial.print("LDR: ");
-        Serial.println(data.light);
+        light = analogRead(ldrPin);
         if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+            data.light = light;
             xSemaphoreGive(mutex);
         }
+
         vTaskDelay(pdMS_TO_TICKS(LDR_READ_INTERVAL_MS));
     }
 }

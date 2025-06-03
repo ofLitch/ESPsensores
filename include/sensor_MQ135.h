@@ -44,19 +44,30 @@ void taskMQ135(void *pvParameters) {
     mqSensor->setR0(calcR0/10);
 
     // Comprobar que todos los parámetros sean válidos
-    if( mutex == NULL || isinf(calcR0) || calcR0 == 0 ) { 
-        Serial.println("Error: Parámetros inválidos en la tarea MQ135.");
+    if( mutex == NULL ) { 
+        Serial.println("Error: Mutex no inicializado en la tarea MQ135.");
         mqSensor->serialDebug();
-        vTaskDelete(NULL); // Terminar la tarea si los parámetros son inválidos
+        vTaskDelete(NULL);
+        return;
+    }
+    if( mqSensor->getR0() <= 0 || mqSensor->getR0() > 1000000  || isinf(mqSensor->getR0())) {
+        Serial.println("Error: R0 inválido en la tarea MQ135.");
+        mqSensor->serialDebug();
+        vTaskDelete(NULL);
         return;
     }
 
+    // Comenzar la lectura del sensor MQ135
+    float ppm = 0.0f;
     vTaskDelay(pdMS_TO_TICKS(3000));
+    
     while (true) {
         mqSensor->update();
-        float ppm = mqSensor->readSensor();
-        Serial.print("PPM: ");
-        Serial.println(ppm);
+        ppm = mqSensor->readSensor();
+        if (xSemaphoreTake(mutex, portMAX_DELAY)) {
+            data.ppm = ppm;
+            xSemaphoreGive(mutex);
+        }
         // mqSensor.serialDebug();
 
         vTaskDelay(pdMS_TO_TICKS(MQ135_READ_INTERVAL_MS));

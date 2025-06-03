@@ -43,10 +43,20 @@ void taskHumidity(void *pvParameters) {
     SemaphoreHandle_t mutex = (SemaphoreHandle_t)params[0];
     DHT *dht = (DHT *)params[1];
 
+    // Comprobar que el mutex y el sensor DHT sean válidos
+    if (mutex == NULL || dht == NULL) {
+        Serial.println("Error: Mutex o sensor DHT no inicializados.");
+        vTaskDelete(NULL);
+        return;
+    }
+
+    // Configurar el sensor DHT y comenzar la lectura
+    dht->begin();
+    float humidity = 0.0f;
+    vTaskDelay(pdMS_TO_TICKS(1000));
+    
     while (true) {
-        float humidity = dht->readHumidity();
-        Serial.print("Humedad: ");
-        Serial.println(humidity);
+        humidity = dht->readHumidity();
         if (!isnan(humidity)) {
             if (xSemaphoreTake(mutex, portMAX_DELAY)) {
                 data.humidity = humidity;
