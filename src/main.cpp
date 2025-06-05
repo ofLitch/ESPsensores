@@ -25,18 +25,19 @@
 #include "sensor_DHT.h"
 #include "sensor_LDR.h"
 #include "sensor_YL69.h"
-#include "printData.h"
 #include "esp_sensores_now.h"
 
 /* =========== Definiciones ============ */
 // Sensores
 #define DHT_TYPE              DHT11                 ///< Tipo de sensor DHT usado
-#define DHT_PIN               32                    ///< Pin para el sensor DHT
-#define YL69_PIN              33                    ///< Pin analógico para el sensor YL69
-#define LDR_PIN               34                    ///< Pin analógico para el sensor LDR
-#define MQ135_AO_PIN          35                    ///< Pin analógico para MQ135
+#define DHT_PIN               35                    ///< Pin para el sensor DHT
+#define YL69_PIN              32                    ///< Pin analógico para el sensor YL69
+#define LDR_PIN               33                    ///< Pin analógico para el sensor LDR
+#define MQ135_AO_PIN          34                    ///< Pin analógico para MQ135
 #define MQ135_VOLTAGE         4.0f                  ///< Voltaje en el que se alimenta el sensor MQ135
 #define MQ135_ADC_RESOLUTION  12                    ///< Resolución del ADC (12 bits para ESP32)
+SemaphoreHandle_t mutex; ///< Mutex para sincronización entre tareas;  
+
 // ESP-NOW
 //#define BROADCAST_ADDRESS     {0xF4, 0x65, 0x0B, 0xE5, 0x49, 0x88} ///< Dirección MAC de broadcast para ESP-NOW F4:65:0B:E5:49:88
 
@@ -62,36 +63,34 @@
 void setup() {
   // Constantes de Pines y Parámetros
   const uint8_t dhtType = DHT_TYPE;
-  const unsigned short int dhtPin = DHT_PIN;      // ( Pin 32 para DHT11 )
-  const unsigned short int ylPin = YL69_PIN;      // ( Pin 33 para YL69 )
-  const unsigned short int ldrPin = LDR_PIN;      // ( Pin 34 para LDR )
-  const unsigned short int mqPin = MQ135_AO_PIN;  // ( Pin 35 para MQ135 )
+  const unsigned short int dhtPin = DHT_PIN;      // ( Pin 33 para DHT11 )
+  const unsigned short int ylPin = YL69_PIN;      // ( Pin 32 para YL69 )
+  const unsigned short int ldrPin = LDR_PIN;      // ( Pin 35 para LDR )
+  const unsigned short int mqPin = MQ135_AO_PIN;  // ( Pin 34 para MQ135 )
 
   // Instancias
-  SemaphoreHandle_t mutex = xSemaphoreCreateMutex();
+  mutex = xSemaphoreCreateMutex();
   static DHT dht(dhtPin, dhtType);
   static MQUnifiedsensor mqSensor("ESP-32", MQ135_VOLTAGE, MQ135_ADC_RESOLUTION, MQ135_AO_PIN, "MQ-135");
 
   // Inicializar
   Serial.begin(115200);
+  WiFi.mode(WIFI_MODE_APSTA);
   dht.begin();
 
   // Parámetros para tasks
-  void *paramData[1] = {mutex}; 
-  void *paramsDHT[2] = {mutex, &dht};
-  void *paramsMQ135[2] = {mutex, &mqSensor};
-  void *paramsLDR[2] = {mutex, (void *)(uintptr_t)ldrPin};
-  void *paramsYL69[2] = {mutex, (void *)(uintptr_t)ylPin};
+  void *paramsDHT[1] = {&dht};
+  void *paramsMQ135[1] = {&mqSensor};
+  void *paramsLDR[1] = {(void *)(uintptr_t)ldrPin};
+  void *paramsYL69[1] = {(void *)(uintptr_t)ylPin};
 
   // Tasks Sensores
-  xTaskCreate(taskEspNow, "ESP-NOW Task", 8196, paramData, 2, NULL);
+  xTaskCreate(taskEspNow, "ESP-NOW Task", 8192, NULL, 2, NULL);
   xTaskCreate(taskTemperature, "DHT11: Read Temperature Function", 4096, paramsDHT, 2, NULL);
   xTaskCreate(taskHumidity, "DHT11: Read Humidity Function", 4096, paramsDHT, 2, NULL);
-  xTaskCreate(taskMQ135, "MQ135: Read Gas Concentration", 2048, paramsMQ135, 2, NULL);
-  xTaskCreate(taskYL69, "YL69: Read Soil Moisture", 2048, paramData, 2, NULL);
-  xTaskCreate(taskLDR, "LDR: Read Light Level", 2048, paramsLDR, 2, NULL);
-  // Tarea para imprimir datos
-  //xTaskCreate(taskPrintData, "Print Sensor Data", 2048, paramData, 2, NULL);
+  xTaskCreate(taskMQ135, "MQ135: Read Gas Concentration", 4096, paramsMQ135, 2, NULL);
+  xTaskCreate(taskYL69, "YL69: Read Soil Moisture", 4096, paramsYL69, 2, NULL);
+  xTaskCreate(taskLDR, "LDR: Read Light Level", 4096, paramsLDR, 2, NULL);
 }
 
 void loop() {}

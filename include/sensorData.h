@@ -16,8 +16,7 @@ struct SensorData {
     float soilWet = 0.0f;            ///< Humedad del suelo medida por el sensor YL69
     unsigned short light = 0;       ///< Nivel de luz medido por el sensor LDR
     RtcDateTime dateTime = RtcDateTime(0);     ///< Hora leída por el DS1302
-} data;
+} data, buffer;
 
-extern SensorData data;
 
 #endif // SENSORDATA_H

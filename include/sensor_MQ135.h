@@ -6,10 +6,11 @@
 #include "sensorData.h"
 
 // Definiciones para el sensor MQ135
-#define MQ135_READ_INTERVAL_MS 1000               ///< Intervalo de muestreo en milisegundos
+#define MQ135_READ_INTERVAL_MS 3000               ///< Intervalo de muestreo en milisegundos
 #define MQ135_RL 10.0f                            ///< Resistencia de carga (RL) en kiloohmios
 #define MQ135_A 110.47                            ///< Valor A para configurar CO2
 #define MQ135_B -2.862                            ///< Valor B para configurar CO2
+extern SemaphoreHandle_t mutex;
 
 /**
  * @file sensor_MQ135.h
@@ -20,8 +21,7 @@
 void taskMQ135(void *pvParameters) {    
     // Desempaquetar los parámetros
     void **params = (void **)pvParameters;
-    SemaphoreHandle_t mutex = (SemaphoreHandle_t)params[0];
-    MQUnifiedsensor* mqSensor = (MQUnifiedsensor *)params[1];
+    MQUnifiedsensor* mqSensor = (MQUnifiedsensor *)params[0];
 
     // Inicializar el sensor MQ135
     mqSensor->setRegressionMethod(1); //_PPM =  a*ratio^b
@@ -66,7 +66,7 @@ void taskMQ135(void *pvParameters) {
             data.ppm = ppm;
             xSemaphoreGive(mutex);
         }
-        // mqSensor.serialDebug();
+        // mqSensor->serialDebug();
 
         vTaskDelay(pdMS_TO_TICKS(MQ135_READ_INTERVAL_MS));
     }

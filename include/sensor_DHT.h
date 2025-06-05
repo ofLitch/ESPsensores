@@ -5,6 +5,7 @@
 #include "DHT.h"
 #include "sensorData.h"
 #define DHT_READ_INTERVAL_MS 2100  ///< Intervalo de muestreo en milisegundos
+extern SemaphoreHandle_t mutex;
 
 /**
  * @file sensor_DHT.h
@@ -15,12 +16,11 @@
 void taskTemperature(void *pvParameters) {
     // Desempaquetar los parámetros
     void **params = (void **)pvParameters;
-    SemaphoreHandle_t mutex = (SemaphoreHandle_t)params[0];
-    DHT *dht = (DHT *)params[1];
+    DHT *dht = (DHT *)params[0];
 
     // Comprobar que el mutex y el sensor DHT sean válidos
-    if (mutex == NULL || dht == NULL) {
-        Serial.println("Error: Mutex o sensor DHT no inicializados.");
+    if (mutex == NULL) {
+        Serial.println("Error: Mutex no inicializado.");
         vTaskDelete(NULL);
         return;
     }
@@ -50,12 +50,11 @@ void taskTemperature(void *pvParameters) {
 void taskHumidity(void *pvParameters) {
     // Desempaquetar los parámetros
     void **params = (void **)pvParameters;
-    SemaphoreHandle_t mutex = (SemaphoreHandle_t)params[0];
-    DHT *dht = (DHT *)params[1];
+    DHT *dht = (DHT *)params[0];
 
     // Comprobar que el mutex y el sensor DHT sean válidos
-    if (mutex == NULL || dht == NULL) {
-        Serial.println("Error: Mutex o sensor DHT no inicializados.");
+    if (mutex == NULL) {
+        Serial.println("Error: Mutex no inicializado.");
         vTaskDelete(NULL);
         return;
     }

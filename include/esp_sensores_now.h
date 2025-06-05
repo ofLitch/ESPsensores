@@ -7,10 +7,12 @@
 #include <esp_now.h>
 #include <WiFi.h>
 #include "sensorData.h"
+#include "esp_wifi.h"
 
 // Definiciones
-#define DELAY_ESP_NOW 2000 ///< Tiempo de espera entre envíos de datos a través de ESP-NOW
+#define DELAY_ESP_NOW 250 ///< Tiempo de espera entre envíos de datos a través de ESP-NOW
 const uint8_t BROADCAST_ADDRESS[] = {0xF4, 0x65, 0x0B, 0xE5, 0x49, 0x88};
+extern SemaphoreHandle_t mutex;
 
 /**
  * @file 
@@ -19,57 +21,59 @@ const uint8_t BROADCAST_ADDRESS[] = {0xF4, 0x65, 0x0B, 0xE5, 0x49, 0x88};
  * @param pvParameters 
  */
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
-    Serial.print("\r\nLast Packet Send Status:\t");
-    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+    Serial.println(status == ESP_NOW_SEND_SUCCESS ? "📩 Entrega Exitosa a ESPmain" : "⚠️ Error de Entrega a ESPmain");
 }
-
-void taskEspNow(void *pvParameters){
-    // Parámetros de entrada
-    SemaphoreHandle_t mutex = ((SemaphoreHandle_t *)pvParameters)[0];
-    
+esp_err_t esp_wifi_config_espnow_channel(uint8_t channel) {
+    esp_err_t err = esp_wifi_set_promiscuous(true);
+    if (err != ESP_OK) {
+        return err;
+    }
+    err = esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+    if (err != ESP_OK) {
+        return err;
+    }
+    err = esp_wifi_set_promiscuous(false);
+    return err;
+}
+void taskEspNow(void *pvParameters){    
     // Inicializar ESP-NOW
-    WiFi.mode(WIFI_STA);
     if (esp_now_init() != ESP_OK) {
         Serial.println("Error initializing ESP-NOW");
         return;
     }
     
     // Registrar callback para el estado del envío
-    esp_now_register_send_cb(OnDataSent);
+    esp_err_t result = esp_now_register_send_cb(OnDataSent);
+    if (result != ESP_OK) {
+        Serial.print("Error registering send callback: ");
+        Serial.println(esp_err_to_name(result));
+        return;
+    }
+
+
     esp_now_peer_info_t peerInfo;
     memcpy(peerInfo.peer_addr, BROADCAST_ADDRESS, 6);
-    peerInfo.channel = 0;  
+    peerInfo.channel = 5;  
     peerInfo.encrypt = false;
-
+esp_wifi_config_espnow_channel(5);
     // Agregar par
     if (esp_now_add_peer(&peerInfo) != ESP_OK){
         Serial.println("Failed to add peer");
         return;
     }
-    SensorData buffer;
-    buffer.ppm = 0.0f;
-    buffer.temperature = 0.0f;  
-    buffer.humidity = 0.0f;
-    buffer.soilWet = 0.0f;
-    buffer.light = 0;
-    buffer.dateTime = RtcDateTime(0); // Inicializar con 0 segundos desde 2000
+
     while (true) {
         // Enviar datos a través de ESP-NOW
         if (xSemaphoreTake(mutex, portMAX_DELAY)) {
-            buffer.ppm = data.ppm;              
-            buffer.temperature = data.temperature;   
-            buffer.humidity = data.humidity;           
-            buffer.soilWet = data.soilWet;            
-            buffer.light = data.light;     
-            buffer.dateTime = RtcDateTime(0); // Inicializar con 0 segundos desde 2000
+            buffer = data;
             xSemaphoreGive(mutex);
         }
 
         esp_err_t result = esp_now_send(BROADCAST_ADDRESS, (uint8_t *) &buffer, sizeof(buffer));
         if (result == ESP_OK) {
-            Serial.println("Data sent successfully");
+            Serial.println("📤 Data enviada correctamente a ESPmain");
         } else {
-            Serial.print("Error sending data: ");
+            Serial.print("⚠️ Error de envío a ESPmain: ");
             Serial.println(esp_err_to_name(result));
         }
 

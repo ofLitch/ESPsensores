@@ -8,6 +8,7 @@
 
 // Definiciones para el sensor LDR
 #define LDR_READ_INTERVAL_MS 1000               ///< Intervalo de muestreo en milisegundos
+extern SemaphoreHandle_t mutex;
 
 /**
  * @file sensor_LDR.h
@@ -17,9 +18,7 @@
  */
 void taskLDR(void *pvParameters) {    
     // Desempaquetar los parámetros
-    void **params = (void **)pvParameters;
-    SemaphoreHandle_t mutex = (SemaphoreHandle_t)params[0];
-    int ldrPin = (int)(uintptr_t)params[1];
+    int ldrPin = (int)(uintptr_t)pvParameters;
 
     // Comprobar que el mutex y el pin LDR sean válidos
     if (mutex == NULL) {

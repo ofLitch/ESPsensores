@@ -8,6 +8,7 @@
 
 // Definiciones para el sensor YL69
 #define YL_READ_INTERVAL_MS 3000               ///< Intervalo de muestreo en milisegundos
+extern SemaphoreHandle_t mutex;
 
 /**
  * @file sensor_YL69.h
@@ -16,10 +17,8 @@
  * @param pvParameters Puntero a los parámetros que incluye el mutex y el pin del sensor YL69.
  */
 void taskYL69(void *pvParameters) {
-    // Desempaquetar los parámetros    
-    void **params = (void **)pvParameters;
-    SemaphoreHandle_t mutex = (SemaphoreHandle_t)params[0];
-    int ylPin = (int)(uintptr_t)params[1];
+    // Desempaquetar los parámetros
+    int ylPin = (int)(uintptr_t)pvParameters;
 
     // Comprobar que el mutex y el pin YL69 sean válidos
     if (mutex == NULL) {
